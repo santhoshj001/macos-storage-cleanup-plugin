@@ -1,0 +1,36 @@
+{
+  "name": "macos-storage-cleanup",
+  "version": "1.0.0",
+  "description": "Comprehensive macOS storage analysis and cleanup — scans caches, downloads, iOS backups, Time Machine snapshots, iMessage/Mail media, app leftovers, and developer tools (Xcode, Android Studio, Docker). Interactive HTML report, safe trash-based deletion, restore capability.",
+  "author": "santhoshj",
+  "license": "MIT",
+  "repository": "https://github.com/santhoshj/macos-storage-cleanup",
+  "keywords": [
+    "macos",
+    "storage",
+    "cleanup",
+    "disk-space",
+    "cache-cleaner",
+    "xcode",
+    "android-studio",
+    "docker",
+    "claude-code-plugin"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "commands": [
+    "commands/cleanup-scan.md",
+    "commands/cleanup-execute.md",
+    "commands/cleanup-quick.md",
+    "commands/cleanup-disk-usage.md",
+    "commands/cleanup-large-files.md",
+    "commands/cleanup-duplicates.md",
+    "commands/cleanup-report.md",
+    "commands/cleanup-restore.md",
+    "commands/cleanup-health.md",
+    "commands/cleanup-history.md",
+    "commands/cleanup-safe-zones.md",
+    "commands/cleanup-setup.md"
+  ]
+}

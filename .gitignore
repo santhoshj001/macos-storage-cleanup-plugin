@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Plugin runtime data (user-specific, not committed)
+.macos-cleanup/
+
+# Claude Code local settings
+.claude/settings.local.json
+.claude/projects/
+.claude/teams/
+.claude/tasks/
+
+# Node.js (for report-server.js)
+node_modules/
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.*

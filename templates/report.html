@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>macOS Storage Cleanup Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1d1d1f;
+                color: #f5f5f7;
+            }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .container {
+                background: #2d2d2d;
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .disk-summary {
+            margin-bottom: 30px;
+        }
+
+        .summary-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+
+        .disk-bar {
+            width: 100%;
+            height: 24px;
+            background: #e5e5e7;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .disk-bar {
+                background: #424245;
+            }
+        }
+
+        .disk-used {
+            background: linear-gradient(90deg, #ef4444 0%, #f97316 100%);
+            transition: width 0.3s ease;
+        }
+
+        .disk-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #86868b;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .disk-stats {
+                color: #a1a1a6;
+            }
+        }
+
+        .disk-stats-item {
+            display: flex;
+            gap: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #0084f4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0073e6;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 132, 244, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e5e5e7;
+            color: #1d1d1f;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d1d6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .btn-secondary {
+                background: #424245;
+                color: #f5f5f7;
+            }
+
+            .btn-secondary:hover {
+                background: #555558;
+            }
+        }
+
+        .categories {
+            margin-bottom: 24px;
+        }
+
+        .accordion-item {
+            border: 1px solid #e5e5e7;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .accordion-item {
+                border-color: #424245;
+            }
+        }
+
+        .accordion-header {
+            background: #f5f5f7;
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .accordion-header:hover {
+            background: #efefef;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .accordion-header {
+                background: #3a3a3d;
+            }
+
+            .accordion-header:hover {
+                background: #424245;
+            }
+        }
+
+        .accordion-header.active {
+            background: #f9fafb;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .accordion-header.active {
+                background: #424245;
+            }
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .toggle-icon {
+            display: inline-block;
+            transition: transform 0.2s ease;
+            color: #0084f4;
+            font-weight: bold;
+        }
+
+        .accordion-header.active .toggle-icon {
+            transform: rotate(90deg);
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .category-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .category-desc {
+            font-size: 13px;
+            opacity: 0.6;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            white-space: nowrap;
+        }
+
+        .safety-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .safety-safe {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .safety-safe {
+                background: #064e3b;
+                color: #86efac;
+            }
+        }
+
+        .safety-review {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .safety-review {
+                background: #78350f;
+                color: #fcd34d;
+            }
+        }
+
+        .category-size {
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 13px;
+            color: #86868b;
+            font-weight: 500;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .category-size {
+                color: #a1a1a6;
+            }
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: white;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .accordion-content {
+                background: #2d2d2d;
+            }
+        }
+
+        .accordion-content.active {
+            max-height: 2000px;
+        }
+
+        .item-list {
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .item {
+            padding: 12px 0;
+            border-top: 1px solid #e5e5e7;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .item:first-child {
+            border-top: none;
+            padding-top: 16px;
+        }
+
+        .item:last-child {
+            padding-bottom: 16px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .item {
+                border-top-color: #424245;
+            }
+        }
+
+        .item-checkbox {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            cursor: pointer;
+            flex-shrink: 0;
+            accent-color: #0084f4;
+        }
+
+        .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-path {
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 13px;
+            color: #1d1d1f;
+            word-break: break-word;
+            margin-bottom: 4px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .item-path {
+                color: #f5f5f7;
+            }
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .item-size {
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-weight: 500;
+        }
+
+        .warning-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: #fca5a5;
+            color: #7f1d1d;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .warning-icon {
+                background: #7f1d1d;
+                color: #fca5a5;
+            }
+        }
+
+        .item-description {
+            font-size: 12px;
+            opacity: 0.6;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        .imessage-warning {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+            padding: 12px;
+            margin: 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #7f1d1d;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .imessage-warning {
+                background: #7f1d1d;
+                border-left-color: #fca5a5;
+                color: #fee2e2;
+            }
+        }
+
+        .footer {
+            background: #f5f5f7;
+            padding: 24px 30px;
+            border-top: 1px solid #e5e5e7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .footer {
+                background: #3a3a3d;
+                border-top-color: #424245;
+            }
+        }
+
+        .total-selection {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .total-size {
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            color: #0084f4;
+            font-size: 16px;
+            margin-left: 4px;
+        }
+
+        .submit-button {
+            background: #34c759;
+            color: white;
+            padding: 12px 24px;
+            font-size: 15px;
+        }
+
+        .submit-button:hover {
+            background: #30b452;
+        }
+
+        .submit-button:disabled {
+            background: #d1d1d6;
+            cursor: not-allowed;
+            color: #86868b;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .submit-button:disabled {
+                background: #424245;
+                color: #a1a1a6;
+            }
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 16px 30px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .message.success {
+                background: #064e3b;
+                color: #d1fae5;
+                border-color: #059669;
+            }
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #7f1d1d;
+            border: 1px solid #fca5a5;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .message.error {
+                background: #7f1d1d;
+                color: #fee2e2;
+                border-color: #dc2626;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .submit-button {
+                width: 100%;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .header-right {
+                flex-direction: column;
+                align-items: flex-start;
+                white-space: normal;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>macOS Storage Cleanup Report</h1>
+            <p id="timestamp"></p>
+        </div>
+
+        <div class="content">
+            <div class="disk-summary">
+                <div class="summary-label">Disk Usage</div>
+                <div class="disk-bar">
+                    <div class="disk-used" id="diskBar"></div>
+                </div>
+                <div class="disk-stats">
+                    <div class="disk-stats-item">
+                        <span id="diskUsed">0 GB</span>
+                        <span id="diskTotal">/ 0 GB</span>
+                        <span id="diskPercent">0%</span>
+                    </div>
+                    <div id="diskAvailable">0 GB available</div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" id="selectAllSafe">Select All Safe Items</button>
+                <button class="btn-secondary" id="deselectAll">Deselect All</button>
+            </div>
+
+            <div id="messageContainer"></div>
+
+            <div id="iMessageWarning"></div>
+
+            <div class="categories" id="categories">
+                <div class="empty-state">Loading categories...</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="total-selection">
+                Total Selection: <span class="total-size" id="totalSize">0 B</span>
+            </div>
+            <button class="btn-primary submit-button" id="submitBtn">Submit Cleanup Selections</button>
+        </div>
+    </div>
+
+    <script>
+        const SCAN_DATA = __SCAN_DATA__;
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
+        }
+
+        function createTextNode(text) {
+            return document.createTextNode(text);
+        }
+
+        function createSafeElement(tag, className, content) {
+            const element = document.createElement(tag);
+            if (className) element.className = className;
+            if (typeof content === 'string') {
+                element.textContent = content;
+            } else if (content instanceof Node) {
+                element.appendChild(content);
+            }
+            return element;
+        }
+
+        function initializeReport() {
+            if (!SCAN_DATA || !SCAN_DATA.categories) {
+                const emptyDiv = createSafeElement('div', 'empty-state', 'No scan data available');
+                document.getElementById('categories').textContent = '';
+                document.getElementById('categories').appendChild(emptyDiv);
+                return;
+            }
+
+            // Set timestamp
+            const date = new Date(SCAN_DATA.timestamp);
+            document.getElementById('timestamp').textContent = date.toLocaleString();
+
+            // Set disk stats
+            const usedPercent = SCAN_DATA.disk_percent_used || 0;
+            document.getElementById('diskBar').style.width = usedPercent + '%';
+            document.getElementById('diskUsed').textContent = formatBytes(SCAN_DATA.disk_used_bytes);
+            document.getElementById('diskTotal').textContent = '/ ' + formatBytes(SCAN_DATA.disk_total_bytes);
+            document.getElementById('diskPercent').textContent = usedPercent + '%';
+            document.getElementById('diskAvailable').textContent = formatBytes(SCAN_DATA.disk_available_bytes) + ' available';
+
+            // Check for iMessage warning
+            const hasIMessage = SCAN_DATA.categories.some(cat =>
+                cat.items && cat.items.some(item => item.category === 'imessage')
+            );
+            if (hasIMessage) {
+                const warningDiv = document.getElementById('iMessageWarning');
+                warningDiv.className = 'imessage-warning';
+                warningDiv.textContent = '⚠️ Warning: Deleting iMessage data will result in permanent data loss. Ensure you have backups before proceeding.';
+            }
+
+            // Render categories
+            const categoriesDiv = document.getElementById('categories');
+            categoriesDiv.textContent = '';
+
+            SCAN_DATA.categories.forEach((category, index) => {
+                const item = createSafeElement('div', 'accordion-item');
+
+                const header = createSafeElement('div', 'accordion-header');
+                header.onclick = function() {
+                    toggleCategory(this, `category-${index}`);
+                };
+
+                const headerLeft = createSafeElement('div', 'header-left');
+                const toggleIcon = createSafeElement('span', 'toggle-icon', '›');
+                const headerTitle = createSafeElement('div', 'header-title');
+                const categoryName = createSafeElement('div', 'category-name', category.name);
+                const itemCount = (category.items && category.items.length) || 0;
+                const categoryDesc = createSafeElement('div', 'category-desc',
+                    itemCount + ' item' + (itemCount !== 1 ? 's' : '') + ' • ' + (category.description || ''));
+
+                headerTitle.appendChild(categoryName);
+                headerTitle.appendChild(categoryDesc);
+                headerLeft.appendChild(toggleIcon);
+                headerLeft.appendChild(headerTitle);
+
+                const headerRight = createSafeElement('div', 'header-right');
+
+                const safeBadge = createSafeElement('div', 'safety-badge ' + (category.safety === 'safe' ? 'safety-safe' : 'safety-review'));
+                safeBadge.textContent = category.safety === 'safe' ? '✓ SAFE' : '⚠ REVIEW';
+
+                const categorySize = createSafeElement('div', 'category-size', formatBytes(category.total_bytes));
+
+                headerRight.appendChild(safeBadge);
+                headerRight.appendChild(categorySize);
+
+                header.appendChild(headerLeft);
+                header.appendChild(headerRight);
+
+                const content = createSafeElement('div', 'accordion-content');
+                content.id = `category-${index}`;
+
+                const itemList = createSafeElement('div', 'item-list');
+                (category.items || []).forEach(itemData => {
+                    const itemDiv = createSafeElement('div', 'item');
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'item-checkbox';
+                    checkbox.setAttribute('data-path', itemData.path);
+                    checkbox.setAttribute('data-size', itemData.size_bytes.toString());
+                    checkbox.addEventListener('change', updateTotal);
+
+                    const itemInfo = createSafeElement('div', 'item-info');
+                    const itemPath = createSafeElement('div', 'item-path', itemData.path);
+                    const itemMeta = createSafeElement('div', 'item-meta');
+
+                    if (itemData.safety === 'review') {
+                        const warningIcon = createSafeElement('span', 'warning-icon', '!');
+                        itemMeta.appendChild(warningIcon);
+                    }
+
+                    const itemSize = createSafeElement('span', 'item-size', itemData.size_human || formatBytes(itemData.size_bytes));
+                    itemMeta.appendChild(itemSize);
+
+                    itemInfo.appendChild(itemPath);
+                    itemInfo.appendChild(itemMeta);
+
+                    if (itemData.description) {
+                        const itemDescription = createSafeElement('div', 'item-description', itemData.description);
+                        itemInfo.appendChild(itemDescription);
+                    }
+
+                    itemDiv.appendChild(checkbox);
+                    itemDiv.appendChild(itemInfo);
+                    itemList.appendChild(itemDiv);
+                });
+
+                content.appendChild(itemList);
+                item.appendChild(header);
+                item.appendChild(content);
+                categoriesDiv.appendChild(item);
+            });
+
+            // Add event listeners
+            document.getElementById('selectAllSafe').addEventListener('click', selectAllSafe);
+            document.getElementById('deselectAll').addEventListener('click', deselectAll);
+            document.getElementById('submitBtn').addEventListener('click', submitSelections);
+
+            updateTotal();
+        }
+
+        function toggleCategory(header, categoryId) {
+            header.classList.toggle('active');
+            const content = document.getElementById(categoryId);
+            content.classList.toggle('active');
+        }
+
+        function selectAllSafe() {
+            document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                const path = checkbox.getAttribute('data-path');
+                const item = SCAN_DATA.categories
+                    .flatMap(c => c.items || [])
+                    .find(i => i.path === path);
+
+                if (item && item.safety === 'safe') {
+                    checkbox.checked = true;
+                }
+            });
+            updateTotal();
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateTotal();
+        }
+
+        function updateTotal() {
+            let totalBytes = 0;
+            document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
+                totalBytes += parseInt(checkbox.getAttribute('data-size')) || 0;
+            });
+            document.getElementById('totalSize').textContent = formatBytes(totalBytes);
+        }
+
+        async function submitSelections() {
+            const selections = [];
+            document.querySelectorAll('.item-checkbox:checked').forEach(checkbox => {
+                selections.push({
+                    path: checkbox.getAttribute('data-path'),
+                    size_bytes: parseInt(checkbox.getAttribute('data-size'))
+                });
+            });
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+
+            try {
+                const submitUrl = window.location.origin + '/submit';
+                const response = await fetch(submitUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(selections)
+                });
+
+                if (response.ok) {
+                    showMessage('success', 'Cleanup selections submitted successfully. You can close this tab.');
+                } else {
+                    throw new Error('Server error');
+                }
+            } catch (error) {
+                // Fallback: copy to clipboard
+                try {
+                    await navigator.clipboard.writeText(JSON.stringify(selections, null, 2));
+                    showMessage('success', 'Selections copied to clipboard. Paste into Claude Code to proceed.');
+                } catch (clipboardError) {
+                    showMessage('error', 'Could not submit or copy. Please try again.');
+                    submitBtn.disabled = false;
+                }
+            }
+        }
+
+        function showMessage(type, text) {
+            const container = document.getElementById('messageContainer');
+            container.textContent = '';
+            const message = createSafeElement('div', `message ${type} show`, text);
+            container.appendChild(message);
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initializeReport);
+    </script>
+</body>
+</html>
