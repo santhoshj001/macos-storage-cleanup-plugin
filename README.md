@@ -45,7 +45,7 @@ This plugin brings it all into a single AI-powered Claude Code experience with s
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/santhoshj/macos-storage-cleanup.git
+git clone https://github.com/santhoshj001/macos-storage-cleanup-plugin.git
 ```
 
 ### Step 2: Install the Plugin

@@ -180,4 +180,4 @@ The report at `templates/report.html` is a single self-contained file:
 
 ## Questions?
 
-Open a [GitHub Discussion](https://github.com/santhoshj/macos-storage-cleanup/discussions) or file an issue.
+Open a [GitHub Discussion](https://github.com/santhoshj001/macos-storage-cleanup-plugin/discussions) or file an issue.
