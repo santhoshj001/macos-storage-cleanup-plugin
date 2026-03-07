@@ -1,6 +1,6 @@
-# macOS Storage Cleanup
+# macOS Storage Cleanup — Claude Code Plugin
 
-**A Claude Code plugin that finds and cleans hidden storage hogs on macOS — from system caches to Xcode DerivedData, iOS backups to Docker images.**
+**A plugin for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that finds and cleans hidden storage hogs on macOS — from system caches to Xcode DerivedData, iOS backups to Docker images.**
 
 Mac users unknowingly accumulate 50-500 GB of recoverable space across system caches, old downloads, iOS backups, Time Machine snapshots, iMessage media, and app leftovers. Developers face even more: Xcode DerivedData (40-80 GB), Android Studio emulators (50-100 GB), Docker images, and package manager caches everywhere.
 

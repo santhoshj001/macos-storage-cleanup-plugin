@@ -1,4 +1,4 @@
-# macOS Storage Cleanup — Claude Code Plugin Plan
+# macOS Storage Cleanup — Claude Code Plugin — Design Plan
 
 ## Context
 

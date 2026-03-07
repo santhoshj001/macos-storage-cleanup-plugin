@@ -1,4 +1,4 @@
-# Contributing to macOS Storage Cleanup
+# Contributing to macOS Storage Cleanup (Claude Code Plugin)
 
 Thank you for your interest in contributing! This guide covers how to set up for development, our conventions, and the PR process.
 

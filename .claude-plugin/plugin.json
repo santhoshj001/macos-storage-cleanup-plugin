@@ -1,7 +1,7 @@
 {
   "name": "macos-storage-cleanup",
   "version": "1.0.0",
-  "description": "Comprehensive macOS storage analysis and cleanup — scans caches, downloads, iOS backups, Time Machine snapshots, iMessage/Mail media, app leftovers, and developer tools (Xcode, Android Studio, Docker). Interactive HTML report, safe trash-based deletion, restore capability.",
+  "description": "A Claude Code plugin for comprehensive macOS storage analysis and cleanup — scans caches, downloads, iOS backups, Time Machine snapshots, iMessage/Mail media, app leftovers, and developer tools (Xcode, Android Studio, Docker). Interactive HTML report, safe trash-based deletion, restore capability.",
   "author": "santhoshj",
   "license": "MIT",
   "repository": "https://github.com/santhoshj/macos-storage-cleanup",

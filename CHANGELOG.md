@@ -1,4 +1,4 @@
-# Changelog
+# Changelog — macOS Storage Cleanup (Claude Code Plugin)
 
 All notable changes to this project will be documented in this file.
 
